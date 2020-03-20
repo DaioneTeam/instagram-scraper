@@ -1171,29 +1171,16 @@ class InstagramScraper(object):
         return os.path.splitext(urlparse(url).path)[1][1:].strip().lower()
 
     @staticmethod
-    def __search(query):
+    def search(query):
         resp = requests.get(SEARCH_URL.format(query))
-        return json.loads(resp.text)
+        return resp.json()
 
     def search_locations(self):
         query = ' '.join(self.usernames)
-        result = self.__search(query)
+        result = self.search(query)
 
-        if len(result['places']) == 0:
-            raise ValueError("No locations found for query '{0}'".format(query))
-
-        sorted_places = sorted(result['places'], key=itemgetter('position'))
-
-        for item in sorted_places[0:5]:
-            place = item['place']
-            print('location-id: {0}, title: {1}, subtitle: {2}, city: {3}, lat: {4}, lng: {5}'.format(
-                place['location']['pk'],
-                place['title'],
-                place['subtitle'],
-                place['location']['city'],
-                place['location']['lat'],
-                place['location']['lng']
-            ))
+        sorted(result['places'], key=itemgetter('position'))
+        return result['places']
 
     def merge_json(self, data, dst='./'):
         if not os.path.exists(dst):
